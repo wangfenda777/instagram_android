@@ -50,6 +50,32 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    // 网络
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi.kotlin)
+
+    // 图片
+    implementation(libs.coil.compose)
+
+    // 导航
+    implementation(libs.navigation.compose)
+
+    // 协程
+    implementation(libs.coroutines.android)
+
+    // ViewModel
+    implementation(libs.lifecycle.viewmodel.compose)
+
+    // 本地存储
+    implementation(libs.datastore.preferences)
+
+    // 视频播放
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

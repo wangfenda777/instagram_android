@@ -29,11 +29,11 @@ fun GreetingScreen() {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
-        Text(text = "欢迎来到 Instagram 风格 App")
+        Text(text = "欢迎来到 Instagram 风格 App11111111134567")
         Button(
             onClick = { /* 点击事件后续添加 */ }
         ) {
-            Text(text = "点击测试")
+            Text(text = "点击测试12222")
         }
     }
 }
