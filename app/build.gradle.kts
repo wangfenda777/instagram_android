@@ -53,10 +53,10 @@ dependencies {
 
     // 网络
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    implementation(libs.moshi.kotlin)
+    implementation(libs.gson)
 
     // 图片
     implementation(libs.coil.compose)

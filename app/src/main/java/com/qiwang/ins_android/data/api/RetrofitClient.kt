@@ -1,18 +1,18 @@
 package com.qiwang.ins_android.data.api
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 /**
  * Retrofit 网络客户端配置。
  *
  * 提供统一的 Retrofit 实例，包含：
- * - Moshi JSON 解析（支持 Kotlin data class）
+ * - Gson JSON 解析（容错性好，兼容各种后端返回格式）
  * - OkHttp 客户端（Token 注入 + 401 处理 + 日志）
  * - 10 秒超时
  *
@@ -23,14 +23,14 @@ import java.util.concurrent.TimeUnit
  */
 object RetrofitClient {
 
-    const val BASE_URL = "http://112.124.47.169:8081"
+    const val BASE_URL = "http://112.124.47.169"
 
     // AuthInterceptor 单例，后续 DataStore 集成后通过 setToken 注入 token
     val authInterceptor = AuthInterceptor()
 
-    private val moshi: Moshi = Moshi.Builder()
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
+    private val gson: Gson = GsonBuilder()
+        .setLenient()
+        .create()
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -48,7 +48,7 @@ object RetrofitClient {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(okHttpClient)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
     /**

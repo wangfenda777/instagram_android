@@ -6,11 +6,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -21,21 +21,54 @@ import androidx.navigation.compose.rememberNavController
 import com.qiwang.ins_android.R
 import com.qiwang.ins_android.ui.screens.ExploreScreen
 import com.qiwang.ins_android.ui.screens.HomeScreen
+import com.qiwang.ins_android.ui.screens.LoginScreen
 import com.qiwang.ins_android.ui.screens.MessagesScreen
 import com.qiwang.ins_android.ui.screens.ProfileScreen
 import com.qiwang.ins_android.ui.screens.PublishScreen
-import com.qiwang.ins_android.ui.theme.InstagramBlue
 import com.qiwang.ins_android.ui.theme.TextPrimary
 import com.qiwang.ins_android.ui.theme.TextSecondary
+import com.qiwang.ins_android.ui.viewmodel.LoginViewModel
 
 /**
  * App 主导航容器。
  *
- * 包含底部 Tab 导航栏和 NavHost，管理 5 个主页面的切换。
- * 底部 Tab 使用 SVG 图标（从 drawable 加载）。
+ * 包含登录页和底部 Tab 导航栏，管理页面切换。
+ * 启动时先显示登录页，登录成功后跳转首页。
  */
 @Composable
 fun MainNavigation() {
+    val navController = rememberNavController()
+    val context = LocalContext.current
+
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Login.route
+    ) {
+        // 登录页
+        composable(Screen.Login.route) {
+            val loginViewModel = LoginViewModel(context)
+            LoginScreen(
+                viewModel = loginViewModel,
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // 主页面（带底部 Tab）
+        composable(Screen.Home.route) {
+            MainScreenWithBottomNav()
+        }
+    }
+}
+
+/**
+ * 带底部导航栏的主页面容器。
+ */
+@Composable
+private fun MainScreenWithBottomNav() {
     val navController = rememberNavController()
 
     Scaffold(
@@ -59,7 +92,7 @@ fun MainNavigation() {
                                 contentDescription = item.label
                             )
                         },
-                        label = null, // Instagram 风格不显示文字标签
+                        label = null,
                         selected = selected,
                         onClick = {
                             navController.navigate(item.route) {
@@ -73,7 +106,7 @@ fun MainNavigation() {
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = TextPrimary,
                             unselectedIconColor = TextSecondary,
-                            indicatorColor = Color.Transparent // 去掉选中指示器背景
+                            indicatorColor = Color.Transparent
                         )
                     )
                 }
@@ -82,14 +115,14 @@ fun MainNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = "home_tab",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
-            composable(Screen.Explore.route) { ExploreScreen() }
-            composable(Screen.Publish.route) { PublishScreen() }
-            composable(Screen.Messages.route) { MessagesScreen() }
-            composable(Screen.Profile.route) { ProfileScreen() }
+            composable("home_tab") { HomeScreen() }
+            composable("explore_tab") { ExploreScreen() }
+            composable("publish_tab") { PublishScreen() }
+            composable("messages_tab") { MessagesScreen() }
+            composable("profile_tab") { ProfileScreen() }
         }
     }
 }
@@ -106,33 +139,33 @@ data class BottomNavItem(
 
 private val bottomNavItems = listOf(
     BottomNavItem(
-        route = Screen.Home.route,
+        route = "home_tab",
         label = "首页",
         unselectedIcon = R.drawable.home,
         selectedIcon = R.drawable.home_selected
     ),
     BottomNavItem(
-        route = Screen.Explore.route,
+        route = "explore_tab",
         label = "探索",
         unselectedIcon = R.drawable.direction,
         selectedIcon = R.drawable.direction_select
     ),
     BottomNavItem(
-        route = Screen.Publish.route,
+        route = "publish_tab",
         label = "发布",
         unselectedIcon = R.drawable.add,
         selectedIcon = R.drawable.add
     ),
     BottomNavItem(
-        route = Screen.Messages.route,
+        route = "messages_tab",
         label = "消息",
         unselectedIcon = R.drawable.video,
         selectedIcon = R.drawable.video_selected
     ),
     BottomNavItem(
-        route = Screen.Profile.route,
+        route = "profile_tab",
         label = "我的",
-        unselectedIcon = R.drawable.my_selected, // 注意：原项目只有 selected 版本
+        unselectedIcon = R.drawable.my_selected,
         selectedIcon = R.drawable.my_selected
     )
 )
