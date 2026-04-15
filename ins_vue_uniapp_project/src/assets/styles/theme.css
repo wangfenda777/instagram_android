@@ -1,0 +1,12 @@
+/* 主题色配置 - 使用 CSS 变量 */
+:root {
+  --theme-primary: #000000;
+  --theme-secondary: #a1a1a1;
+  --theme-bg: #FFFFFF;
+  --theme-border: #f1f1f1;
+  --theme-error: #ED4956;
+  --theme-link: #4150f7;
+  --page-bg: #ffffff;
+  --text-color: #000000;
+  --btn-bg: #e4e4e4;
+}

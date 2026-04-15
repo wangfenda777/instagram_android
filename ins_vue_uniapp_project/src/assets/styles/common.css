@@ -1,0 +1,85 @@
+/* 通用样式 */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feedback-like-animating {
+  animation: like-pop 0.26s ease;
+}
+
+.feedback-save-animating {
+  animation: save-pop 0.24s ease;
+}
+
+.feedback-save-animating .feedback-save-inner {
+  animation: save-bounce 0.24s ease;
+}
+
+.feedback-liked-count {
+  color: #ed4956;
+}
+
+.feedback-saved-surface {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@keyframes like-pop {
+  0% {
+    transform: scale(0.88);
+  }
+  45% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes save-pop {
+  0% {
+    background: rgba(0, 0, 0, 0);
+    transform: scale(0.94);
+  }
+  50% {
+    background: rgba(0, 0, 0, 0.08);
+    transform: scale(1.04);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1);
+  }
+}
+
+@keyframes save-bounce {
+  0% {
+    transform: translateY(2rpx) scale(0.92);
+  }
+  50% {
+    transform: translateY(-2rpx) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
