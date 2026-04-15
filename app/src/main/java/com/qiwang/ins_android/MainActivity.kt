@@ -3,37 +3,21 @@ package com.qiwang.ins_android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.qiwang.ins_android.ui.theme.Ins_androidTheme
+import com.qiwang.ins_android.ui.navigation.MainNavigation
+import com.qiwang.ins_android.ui.theme.InsAndroidTheme
 
+/**
+ * App 主入口 Activity。
+ *
+ * 负责初始化 Compose UI 并应用 Instagram 主题。
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Ins_androidTheme {
-                GreetingScreen()
+            InsAndroidTheme {
+                MainNavigation()
             }
-        }
-    }
-}
-
-@Composable
-fun GreetingScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
-    ) {
-        Text(text = "欢迎来到 Instagram 风格 App11111111134567")
-        Button(
-            onClick = { /* 点击事件后续添加 */ }
-        ) {
-            Text(text = "点击测试12222")
         }
     }
 }
