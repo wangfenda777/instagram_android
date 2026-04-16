@@ -3,6 +3,9 @@
  *
  * 支持双向游标加载（向前/向后），用于个人主页和用户详情页点击帖子后的滚动浏览。
  * 按 api_doc/profile.md 第2节实现。
+ *
+ * 初次加载：后端一次返回锚点帖子的前5条 + 锚点 + 后5条（共最多11条）。
+ * 后续滚动：向上触发 loadBefore()，向下触发 loadAfter()。
  */
 package com.qiwang.ins_android.ui.viewmodel
 
@@ -36,12 +39,17 @@ class UserPostsDetailViewModel(
     private val _hasMoreAfter = MutableStateFlow(true)
     val hasMoreAfter: StateFlow<Boolean> = _hasMoreAfter
 
+    /** 初次加载完成后，锚点帖子在列表中的索引，用于 UI 层初始化滚动位置 */
+    private val _anchorIndex = MutableStateFlow(0)
+    val anchorIndex: StateFlow<Int> = _anchorIndex
+
     init {
         loadInitialPosts()
     }
 
     /**
-     * 初次加载：返回锚点帖子 + 更老的5条。
+     * 初次加载：后端返回锚点帖子的前后各5条（共最多11条）。
+     * 加载完成后计算锚点帖子在列表中的索引。
      */
     private fun loadInitialPosts() {
         viewModelScope.launch {
@@ -55,6 +63,10 @@ class UserPostsDetailViewModel(
                 if (response.code == 200 && response.data != null) {
                     _posts.value = response.data.list
                     _hasMoreAfter.value = response.data.hasMore
+
+                    // 找到锚点帖子的索引
+                    val index = response.data.list.indexOfFirst { it.postId == initialPostId }
+                    _anchorIndex.value = if (index >= 0) index else 0
                 }
             } catch (e: Exception) {
                 android.util.Log.e("UserPostsDetailVM", "初次加载失败", e)
@@ -64,9 +76,7 @@ class UserPostsDetailViewModel(
         }
     }
 
-    /**
-     * 向前加载：返回比当前第一条更新的5条。
-     */
+    /** 向前加载：返回比当前第一条更新的5条。 */
     fun loadBefore() {
         if (_isLoading.value || !_hasMoreBefore.value || _posts.value.isEmpty()) return
 
@@ -93,9 +103,7 @@ class UserPostsDetailViewModel(
         }
     }
 
-    /**
-     * 向后加载：返回比当前最后一条更老的5条。
-     */
+    /** 向后加载：返回比当前最后一条更老的5条。 */
     fun loadAfter() {
         if (_isLoading.value || !_hasMoreAfter.value || _posts.value.isEmpty()) return
 
@@ -122,79 +130,45 @@ class UserPostsDetailViewModel(
         }
     }
 
-    /**
-     * 点赞/取消点赞（乐观更新）。
-     */
+    /** 点赞/取消点赞（乐观更新）。 */
     fun toggleLike(postId: String) {
         val currentPost = _posts.value.find { it.postId == postId } ?: return
         val newIsLiked = !currentPost.isLiked
 
-        // 乐观更新
         _posts.value = _posts.value.map { post ->
             if (post.postId == postId) {
                 post.copy(
                     isLiked = newIsLiked,
                     likesCount = if (newIsLiked) post.likesCount + 1 else post.likesCount - 1
                 )
-            } else {
-                post
-            }
+            } else post
         }
 
         viewModelScope.launch {
             try {
-                if (newIsLiked) {
-                    postApi.likePost(mapOf("postId" to postId))
-                } else {
-                    postApi.unlikePost(mapOf("postId" to postId))
-                }
+                if (newIsLiked) postApi.likePost(mapOf("postId" to postId))
+                else postApi.unlikePost(mapOf("postId" to postId))
             } catch (e: Exception) {
-                // 失败时回滚
-                _posts.value = _posts.value.map { post ->
-                    if (post.postId == postId) {
-                        currentPost
-                    } else {
-                        post
-                    }
-                }
-                e.printStackTrace()
+                _posts.value = _posts.value.map { if (it.postId == postId) currentPost else it }
             }
         }
     }
 
-    /**
-     * 收藏/取消收藏（乐观更新）。
-     */
+    /** 收藏/取消收藏（乐观更新）。 */
     fun toggleSave(postId: String) {
         val currentPost = _posts.value.find { it.postId == postId } ?: return
         val newIsSaved = !currentPost.isSaved
 
-        // 乐观更新
         _posts.value = _posts.value.map { post ->
-            if (post.postId == postId) {
-                post.copy(isSaved = newIsSaved)
-            } else {
-                post
-            }
+            if (post.postId == postId) post.copy(isSaved = newIsSaved) else post
         }
 
         viewModelScope.launch {
             try {
-                if (newIsSaved) {
-                    postApi.savePost(mapOf("postId" to postId))
-                } else {
-                    postApi.unsavePost(mapOf("postId" to postId))
-                }
+                if (newIsSaved) postApi.savePost(mapOf("postId" to postId))
+                else postApi.unsavePost(mapOf("postId" to postId))
             } catch (e: Exception) {
-                // 失败时回滚
-                _posts.value = _posts.value.map { post ->
-                    if (post.postId == postId) {
-                        currentPost
-                    } else {
-                        post
-                    }
-                }
-                e.printStackTrace()
+                _posts.value = _posts.value.map { if (it.postId == postId) currentPost else it }
             }
         }
     }

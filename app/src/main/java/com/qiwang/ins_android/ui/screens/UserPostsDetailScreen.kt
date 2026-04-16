@@ -2,7 +2,8 @@
  * 用户帖子滚动列表页。
  *
  * 从个人主页或用户详情页点击帖子进入，支持上下滚动浏览该用户的所有帖子。
- * 使用双向游标加载实现无限滚动。
+ * 初次加载后端返回锚点帖子的前后各5条，通过 anchorIndex 直接定位到锚点位置。
+ * 后续滚动触发双向游标加载。
  */
 package com.qiwang.ins_android.ui.screens
 
@@ -15,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,8 +42,21 @@ fun UserPostsDetailScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val hasMoreBefore by viewModel.hasMoreBefore.collectAsState()
     val hasMoreAfter by viewModel.hasMoreAfter.collectAsState()
+    val anchorIndex by viewModel.anchorIndex.collectAsState()
 
     val listState = rememberLazyListState()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    // 初次加载完成后，滚动到锚点帖子位置（只执行一次）
+    var hasScrolledToAnchor by remember { mutableStateOf(false) }
+    LaunchedEffect(anchorIndex, posts.size) {
+        if (posts.isNotEmpty() && !hasScrolledToAnchor && anchorIndex > 0) {
+            listState.scrollToItem(anchorIndex)
+            hasScrolledToAnchor = true
+        } else if (posts.isNotEmpty() && !hasScrolledToAnchor) {
+            hasScrolledToAnchor = true
+        }
+    }
 
     // 监听滚动到顶部，触发向前加载
     LaunchedEffect(listState) {
@@ -92,7 +107,9 @@ fun UserPostsDetailScreen(
 
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = screenHeight)
         ) {
             // 顶部加载指示器
             if (isLoading && hasMoreBefore) {
