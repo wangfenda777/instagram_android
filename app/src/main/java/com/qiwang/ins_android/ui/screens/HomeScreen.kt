@@ -35,7 +35,8 @@ import com.qiwang.ins_android.ui.viewmodel.HomeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(),
+    onNavigateToUserDetail: (String) -> Unit = {}
 ) {
     val stories by viewModel.stories.collectAsState()
     val posts by viewModel.posts.collectAsState()
@@ -105,7 +106,7 @@ fun HomeScreen(
                     onLike = { viewModel.toggleLike(post.postId) },
                     onSave = { viewModel.toggleSave(post.postId) },
                     onFollow = { viewModel.followUser(post.userId) },
-                    onUserClick = { /* TODO: 跳转用户详情 */ },
+                    onUserClick = { onNavigateToUserDetail(post.userId) },
                     showFollowButton = !post.isFollowing
                 )
                 InstagramDivider()

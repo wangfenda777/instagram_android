@@ -106,7 +106,7 @@ fun PostCard(
         }
 
         // 图片/视频轮播
-        ImageSwiper(mediaList = post.mediaList)
+        ImageSwiper(mediaList = post.mediaList ?: emptyList())
 
         // 操作栏：点赞、评论、分享、收藏
         Row(

@@ -25,7 +25,8 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String) = "follow_list/$userId"
     }
     object EditProfile : Screen("edit_profile")
-    object EditField : Screen("edit_field/{fieldName}/{currentValue}") {
-        fun createRoute(fieldName: String, currentValue: String) = "edit_field/$fieldName/$currentValue"
+    object EditField : Screen("edit_field/{fieldName}?currentValue={currentValue}") {
+        fun createRoute(fieldName: String, currentValue: String) =
+            "edit_field/$fieldName?currentValue=${java.net.URLEncoder.encode(currentValue, "UTF-8")}"
     }
 }

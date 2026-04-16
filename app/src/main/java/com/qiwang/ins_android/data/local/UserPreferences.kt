@@ -32,6 +32,8 @@ class UserPreferences(private val context: Context) {
     val refreshToken: Flow<String?> = context.dataStore.data.map { it[KEY_REFRESH_TOKEN] }
     val userId: Flow<String?> = context.dataStore.data.map { it[KEY_USER_ID] }
     val username: Flow<String?> = context.dataStore.data.map { it[KEY_USERNAME] }
+    val displayName: Flow<String?> = context.dataStore.data.map { it[KEY_DISPLAY_NAME] }
+    val avatar: Flow<String?> = context.dataStore.data.map { it[KEY_AVATAR] }
 
     /** 保存登录 token */
     suspend fun saveToken(token: String, refreshToken: String) {

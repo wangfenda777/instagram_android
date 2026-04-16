@@ -12,19 +12,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.qiwang.ins_android.R
+import com.qiwang.ins_android.ui.screens.EditFieldScreen
+import com.qiwang.ins_android.ui.screens.EditProfileScreen
 import com.qiwang.ins_android.ui.screens.ExploreScreen
+import com.qiwang.ins_android.ui.screens.FollowListScreen
 import com.qiwang.ins_android.ui.screens.HomeScreen
 import com.qiwang.ins_android.ui.screens.LoginScreen
 import com.qiwang.ins_android.ui.screens.MessagesScreen
 import com.qiwang.ins_android.ui.screens.ProfileScreen
 import com.qiwang.ins_android.ui.screens.PublishScreen
+import com.qiwang.ins_android.ui.screens.SearchOverviewScreen
+import com.qiwang.ins_android.ui.screens.UserDetailScreen
 import com.qiwang.ins_android.ui.theme.TextPrimary
 import com.qiwang.ins_android.ui.theme.TextSecondary
 import com.qiwang.ins_android.ui.viewmodel.LoginViewModel
@@ -32,8 +40,8 @@ import com.qiwang.ins_android.ui.viewmodel.LoginViewModel
 /**
  * App 主导航容器。
  *
- * 包含登录页和底部 Tab 导航栏，管理页面切换。
- * 启动时先显示登录页，登录成功后跳转首页。
+ * 外层 NavHost 包含登录页、主页面（带底部 Tab）以及所有子页面路由。
+ * 子页面（用户详情、粉丝列表、编辑资料等）在外层导航，不显示底部 Tab。
  */
 @Composable
 fun MainNavigation() {
@@ -59,16 +67,102 @@ fun MainNavigation() {
 
         // 主页面（带底部 Tab）
         composable(Screen.Home.route) {
-            MainScreenWithBottomNav()
+            MainScreenWithBottomNav(rootNavController = navController)
+        }
+
+        // 用户详情页
+        composable(
+            route = Screen.UserDetail.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            UserDetailScreen(
+                userId = userId,
+                onBack = { navController.popBackStack() },
+                onNavigateToFollowList = { uid ->
+                    navController.navigate(Screen.FollowList.createRoute(uid))
+                },
+                onNavigateToUserDetail = { uid ->
+                    navController.navigate(Screen.UserDetail.createRoute(uid))
+                }
+            )
+        }
+
+        // 粉丝/关注列表页
+        composable(
+            route = Screen.FollowList.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            FollowListScreen(
+                userId = userId,
+                onBack = { navController.popBackStack() },
+                onNavigateToUserDetail = { uid ->
+                    navController.navigate(Screen.UserDetail.createRoute(uid))
+                }
+            )
+        }
+
+        // 搜索结果页
+        composable(
+            route = Screen.SearchOverview.route,
+            arguments = listOf(navArgument("keyword") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val keyword = backStackEntry.arguments?.getString("keyword") ?: ""
+            SearchOverviewScreen(
+                keyword = keyword,
+                onBack = { navController.popBackStack() },
+                onNavigateToUserDetail = { uid ->
+                    navController.navigate(Screen.UserDetail.createRoute(uid))
+                }
+            )
+        }
+
+        // 编辑资料页
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToEditField = { fieldName, currentValue ->
+                    navController.navigate(Screen.EditField.createRoute(fieldName, currentValue))
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // 编辑单个字段页
+        composable(
+            route = Screen.EditField.route,
+            arguments = listOf(
+                navArgument("fieldName") { type = NavType.StringType },
+                navArgument("currentValue") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
+            val fieldName = backStackEntry.arguments?.getString("fieldName") ?: ""
+            val currentValue = backStackEntry.arguments?.getString("currentValue") ?: ""
+            EditFieldScreen(
+                fieldName = fieldName,
+                currentValue = currentValue,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
 
 /**
  * 带底部导航栏的主页面容器。
+ *
+ * 接收外层 navController 以便子页面跳转到外层路由（不带底部 Tab）。
  */
 @Composable
-private fun MainScreenWithBottomNav() {
+private fun MainScreenWithBottomNav(rootNavController: NavController) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -118,11 +212,47 @@ private fun MainScreenWithBottomNav() {
             startDestination = "home_tab",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("home_tab") { HomeScreen() }
-            composable("explore_tab") { ExploreScreen() }
-            composable("publish_tab") { PublishScreen() }
+            composable("home_tab") {
+                HomeScreen(
+                    onNavigateToUserDetail = { userId ->
+                        rootNavController.navigate(Screen.UserDetail.createRoute(userId))
+                    }
+                )
+            }
+            composable("explore_tab") {
+                ExploreScreen(
+                    onNavigateToUserDetail = { userId ->
+                        rootNavController.navigate(Screen.UserDetail.createRoute(userId))
+                    },
+                    onNavigateToSearchOverview = { keyword ->
+                        rootNavController.navigate(Screen.SearchOverview.createRoute(keyword))
+                    }
+                )
+            }
+            composable("publish_tab") {
+                PublishScreen(
+                    onBack = {
+                        navController.navigate("home_tab") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
             composable("messages_tab") { MessagesScreen() }
-            composable("profile_tab") { ProfileScreen() }
+            composable("profile_tab") {
+                ProfileScreen(
+                    onNavigateToFollowList = {
+                        rootNavController.navigate(Screen.FollowList.createRoute("me"))
+                    },
+                    onNavigateToEditProfile = {
+                        rootNavController.navigate(Screen.EditProfile.route)
+                    }
+                )
+            }
         }
     }
 }

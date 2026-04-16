@@ -6,6 +6,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,11 +14,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.qiwang.ins_android.R
 import com.qiwang.ins_android.data.model.Media
-import com.qiwang.ins_android.ui.theme.InstagramBlue
 import com.qiwang.ins_android.util.MediaUtil
 
 /**
@@ -36,13 +38,8 @@ fun ImageSwiper(
 
     Box(modifier = modifier) {
         if (mediaList.size == 1) {
-            // 单图直接显示
-            MediaImage(
-                url = mediaList[0].url,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-            )
+            // 单图/视频直接显示
+            MediaItem(media = mediaList[0])
         } else {
             // 多图 HorizontalPager
             val pagerState = rememberPagerState(pageCount = { mediaList.size })
@@ -53,34 +50,67 @@ fun ImageSwiper(
                     .fillMaxWidth()
                     .aspectRatio(1f)
             ) { page ->
-                MediaImage(
-                    url = mediaList[page].url,
-                    modifier = Modifier.fillMaxSize()
-                )
+                MediaItem(media = mediaList[page])
             }
 
-            // 底部圆点指示器
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(mediaList.size) { index ->
-                    val isSelected = pagerState.currentPage == index
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 3.dp)
-                            .size(if (isSelected) 7.dp else 6.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (isSelected) InstagramBlue
-                                else Color.White.copy(alpha = 0.5f)
-                            )
-                    )
+            // 圆点指示器
+            if (mediaList.size > 1) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    repeat(mediaList.size) { index ->
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (pagerState.currentPage == index) Color.White
+                                    else Color.White.copy(alpha = 0.5f)
+                                )
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+/**
+ * 单个媒体项（图片或视频）。
+ *
+ * 视频显示黑色背景 + 播放图标占位。
+ */
+@Composable
+private fun MediaItem(media: Media) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+    ) {
+        if (media.type == "video") {
+            // 视频占位：黑色背景 + 播放图标
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.video),
+                    contentDescription = "视频",
+                    modifier = Modifier.size(48.dp),
+                    tint = Color.White.copy(alpha = 0.8f)
+                )
+            }
+        } else {
+            // 图片正常加载
+            MediaImage(
+                url = media.url,
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
