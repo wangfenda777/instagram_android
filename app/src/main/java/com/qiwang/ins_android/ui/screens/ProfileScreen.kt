@@ -37,8 +37,9 @@ import com.qiwang.ins_android.ui.viewmodel.ProfileViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigateToFollowList: () -> Unit = {},
-    onNavigateToEditProfile: () -> Unit = {}
+    onNavigateToFollowList: (String) -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {},
+    onNavigateToUserPostsDetail: (String, String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val viewModel = remember { ProfileViewModel(context) }
@@ -79,8 +80,8 @@ fun ProfileScreen(
                 ProfileSummary(
                     user = userInfo,
                     stats = stats,
-                    onFollowersClick = onNavigateToFollowList,
-                    onFollowingClick = onNavigateToFollowList
+                    onFollowersClick = { onNavigateToFollowList(userInfo.userId) },
+                    onFollowingClick = { onNavigateToFollowList(userInfo.userId) }
                 )
             }
 
@@ -158,7 +159,12 @@ fun ProfileScreen(
                     1 -> reels
                     else -> emptyList()
                 }
-                ProfileGrid(posts = currentList)
+                ProfileGrid(
+                    posts = currentList,
+                    onItemClick = { postId ->
+                        onNavigateToUserPostsDetail(userInfo.userId, postId)
+                    }
+                )
             }
         }
     }

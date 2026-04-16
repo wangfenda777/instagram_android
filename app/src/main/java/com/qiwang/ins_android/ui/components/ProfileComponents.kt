@@ -175,7 +175,8 @@ fun ProfileTabs(
 @Composable
 fun ProfileGrid(
     posts: List<Post>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClick: (String) -> Unit = {}
 ) {
     if (posts.isEmpty()) {
         Box(
@@ -203,7 +204,11 @@ fun ProfileGrid(
     ) {
         items(posts) { post ->
             val coverUrl = post.coverUrl ?: post.mediaList?.firstOrNull()?.url ?: ""
-            Box(modifier = Modifier.aspectRatio(1f)) {
+            Box(
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .clickable { onItemClick(post.postId) }
+            ) {
                 MediaImage(
                     url = coverUrl,
                     modifier = Modifier.fillMaxSize()

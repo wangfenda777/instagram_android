@@ -76,3 +76,13 @@ data class FeedResponse(
     val hasMore: Boolean = false,
     val lastId: Long = 0
 )
+
+/**
+ * 用户帖子详情列表响应（按 api_doc/profile.md 第2节）。
+ *
+ * 返回帖子列表 + 是否还有更多数据。
+ */
+data class UserPostsDetailResponse(
+    val list: List<Post> = emptyList(),
+    val hasMore: Boolean = false
+)

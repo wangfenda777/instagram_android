@@ -29,7 +29,8 @@ fun UserDetailScreen(
     userId: String,
     onBack: () -> Unit = {},
     onNavigateToFollowList: (String) -> Unit = {},
-    onNavigateToUserDetail: (String) -> Unit = {}
+    onNavigateToUserDetail: (String) -> Unit = {},
+    onNavigateToUserPostsDetail: (String, String) -> Unit = { _, _ -> }
 ) {
     val viewModel = remember(userId) { UserDetailViewModel(userId) }
 
@@ -145,7 +146,12 @@ fun UserDetailScreen(
                     1 -> reels
                     else -> emptyList()
                 }
-                ProfileGrid(posts = currentList)
+                ProfileGrid(
+                    posts = currentList,
+                    onItemClick = { postId ->
+                        onNavigateToUserPostsDetail(userId, postId)
+                    }
+                )
             }
         }
     }

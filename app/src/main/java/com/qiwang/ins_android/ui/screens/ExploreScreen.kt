@@ -49,7 +49,8 @@ private fun ExploreGrid(
     isLoading: Boolean,
     hasMore: Boolean,
     onLoadMore: () -> Unit,
-    onSearchFocus: () -> Unit
+    onSearchFocus: () -> Unit,
+    onItemClick: (String) -> Unit = {}
 ) {
     val gridState = rememberLazyStaggeredGridState()
 
@@ -71,7 +72,7 @@ private fun ExploreGrid(
         verticalItemSpacing = 2.dp
     ) {
         items(items) { item ->
-            ExploreGridItem(item = item)
+            ExploreGridItem(item = item, onClick = { onItemClick(item.postId) })
         }
 
         if (isLoading) {
@@ -96,10 +97,14 @@ private fun ExploreGrid(
  * 视频帖子：宽度相同，高度为图片的2倍（aspectRatio = 0.5f）
  */
 @Composable
-private fun ExploreGridItem(item: ExploreItem) {
+private fun ExploreGridItem(item: ExploreItem, onClick: () -> Unit = {}) {
     val aspectRatio = if (item.mediaType == "video") 0.5f else 1f
 
-    Box(modifier = Modifier.aspectRatio(aspectRatio)) {
+    Box(
+        modifier = Modifier
+            .aspectRatio(aspectRatio)
+            .clickable { onClick() }
+    ) {
         MediaImage(
             url = item.coverUrl,
             modifier = Modifier.fillMaxSize()
@@ -273,7 +278,8 @@ private fun UserSearchItem(user: User, onClick: () -> Unit) {
 fun ExploreScreen(
     viewModel: ExploreViewModel = remember { ExploreViewModel() },
     onNavigateToUserDetail: (String) -> Unit = {},
-    onNavigateToSearchOverview: (String) -> Unit = {}
+    onNavigateToSearchOverview: (String) -> Unit = {},
+    onNavigateToPostDetail: (String) -> Unit = {}
 ) {
     val exploreItems by viewModel.exploreItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -347,7 +353,8 @@ fun ExploreScreen(
                 isLoading = isLoading,
                 hasMore = hasMore,
                 onLoadMore = { viewModel.loadMore() },
-                onSearchFocus = { viewModel.enterSearchMode() }
+                onSearchFocus = { viewModel.enterSearchMode() },
+                onItemClick = { postId -> onNavigateToPostDetail(postId) }
             )
         }
     }

@@ -29,4 +29,10 @@ sealed class Screen(val route: String) {
         fun createRoute(fieldName: String, currentValue: String) =
             "edit_field/$fieldName?currentValue=${java.net.URLEncoder.encode(currentValue, "UTF-8")}"
     }
+    object PostDetail : Screen("post_detail/{postId}") {
+        fun createRoute(postId: String) = "post_detail/$postId"
+    }
+    object UserPostsDetail : Screen("user_posts_detail/{userId}/{postId}") {
+        fun createRoute(userId: String, postId: String) = "user_posts_detail/$userId/$postId"
+    }
 }

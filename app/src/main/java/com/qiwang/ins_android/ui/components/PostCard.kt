@@ -34,9 +34,10 @@ fun PostCard(
     onFollow: () -> Unit,
     onUserClick: () -> Unit,
     modifier: Modifier = Modifier,
-    showFollowButton: Boolean = false
+    showFollowButton: Boolean = false,
+    expandContent: Boolean = false
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(expandContent) }
 
     Column(modifier = modifier.fillMaxWidth()) {
         // 头部：头像 + 用户名 + 地点 + 关注按钮

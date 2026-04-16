@@ -4,6 +4,7 @@ import com.qiwang.ins_android.data.model.ApiResponse
 import com.qiwang.ins_android.data.model.PageResponse
 import com.qiwang.ins_android.data.model.Post
 import com.qiwang.ins_android.data.model.User
+import com.qiwang.ins_android.data.model.UserPostsDetailResponse
 import com.qiwang.ins_android.data.model.UserStats
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -77,4 +78,18 @@ interface UserApiService {
     /** 更新用户资料 */
     @POST("/api/user/profile/update")
     suspend fun updateProfile(@Body body: Map<String, String>): ApiResponse<Unit>
+
+    /**
+     * 获取用户帖子详情列表（游标加载，按 api_doc/profile.md 第2节）。
+     *
+     * 不传 direction：初次加载，返回锚点帖子 + 更老的5条。
+     * direction=before：返回比锚点更新的5条。
+     * direction=after：返回比锚点更老的5条。
+     */
+    @GET("/api/user/posts/detail")
+    suspend fun getUserPostsDetail(
+        @Query("userId") userId: String,
+        @Query("postId") postId: String,
+        @Query("direction") direction: String? = null
+    ): ApiResponse<UserPostsDetailResponse>
 }

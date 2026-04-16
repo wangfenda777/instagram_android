@@ -29,10 +29,12 @@ import com.qiwang.ins_android.ui.screens.FollowListScreen
 import com.qiwang.ins_android.ui.screens.HomeScreen
 import com.qiwang.ins_android.ui.screens.LoginScreen
 import com.qiwang.ins_android.ui.screens.MessagesScreen
+import com.qiwang.ins_android.ui.screens.PostDetailScreen
 import com.qiwang.ins_android.ui.screens.ProfileScreen
 import com.qiwang.ins_android.ui.screens.PublishScreen
 import com.qiwang.ins_android.ui.screens.SearchOverviewScreen
 import com.qiwang.ins_android.ui.screens.UserDetailScreen
+import com.qiwang.ins_android.ui.screens.UserPostsDetailScreen
 import com.qiwang.ins_android.ui.theme.TextPrimary
 import com.qiwang.ins_android.ui.theme.TextSecondary
 import com.qiwang.ins_android.ui.viewmodel.LoginViewModel
@@ -82,6 +84,44 @@ fun MainNavigation() {
                 onNavigateToFollowList = { uid ->
                     navController.navigate(Screen.FollowList.createRoute(uid))
                 },
+                onNavigateToUserDetail = { uid ->
+                    navController.navigate(Screen.UserDetail.createRoute(uid))
+                },
+                onNavigateToUserPostsDetail = { uid, postId ->
+                    navController.navigate(Screen.UserPostsDetail.createRoute(uid, postId))
+                }
+            )
+        }
+
+        // 帖子详情页（探索页点击）
+        composable(
+            route = Screen.PostDetail.route,
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: ""
+            PostDetailScreen(
+                postId = postId,
+                onBack = { navController.popBackStack() },
+                onNavigateToUserDetail = { uid ->
+                    navController.navigate(Screen.UserDetail.createRoute(uid))
+                }
+            )
+        }
+
+        // 用户帖子滚动列表（个人主页/用户详情页点击）
+        composable(
+            route = Screen.UserPostsDetail.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("postId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            val postId = backStackEntry.arguments?.getString("postId") ?: ""
+            UserPostsDetailScreen(
+                userId = userId,
+                postId = postId,
+                onBack = { navController.popBackStack() },
                 onNavigateToUserDetail = { uid ->
                     navController.navigate(Screen.UserDetail.createRoute(uid))
                 }
@@ -226,6 +266,9 @@ private fun MainScreenWithBottomNav(rootNavController: NavController) {
                     },
                     onNavigateToSearchOverview = { keyword ->
                         rootNavController.navigate(Screen.SearchOverview.createRoute(keyword))
+                    },
+                    onNavigateToPostDetail = { postId ->
+                        rootNavController.navigate(Screen.PostDetail.createRoute(postId))
                     }
                 )
             }
@@ -245,11 +288,14 @@ private fun MainScreenWithBottomNav(rootNavController: NavController) {
             composable("messages_tab") { MessagesScreen() }
             composable("profile_tab") {
                 ProfileScreen(
-                    onNavigateToFollowList = {
-                        rootNavController.navigate(Screen.FollowList.createRoute("me"))
+                    onNavigateToFollowList = { userId ->
+                        rootNavController.navigate(Screen.FollowList.createRoute(userId))
                     },
                     onNavigateToEditProfile = {
                         rootNavController.navigate(Screen.EditProfile.route)
+                    },
+                    onNavigateToUserPostsDetail = { userId, postId ->
+                        rootNavController.navigate(Screen.UserPostsDetail.createRoute(userId, postId))
                     }
                 )
             }
