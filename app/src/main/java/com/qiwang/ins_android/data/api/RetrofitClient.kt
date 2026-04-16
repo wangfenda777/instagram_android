@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     const val BASE_URL = "http://112.124.47.169"
+    const val MEDIA_BASE_URL = "http://112.124.47.169:8081"
 
     // AuthInterceptor 单例，后续 DataStore 集成后通过 setToken 注入 token
     val authInterceptor = AuthInterceptor()

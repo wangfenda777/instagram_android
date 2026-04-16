@@ -14,7 +14,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.qiwang.ins_android.R
 import com.qiwang.ins_android.data.model.Post
 import com.qiwang.ins_android.ui.theme.InstagramBlue
@@ -48,9 +47,8 @@ fun PostCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 头像
-            AsyncImage(
-                model = MediaUtil.normalizeUrl(post.avatar),
-                contentDescription = null,
+            MediaImage(
+                url = post.avatar,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(MaterialTheme.shapes.extraLarge)

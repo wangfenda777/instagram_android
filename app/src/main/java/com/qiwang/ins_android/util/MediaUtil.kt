@@ -20,7 +20,7 @@ object MediaUtil {
         return if (url.startsWith("http://") || url.startsWith("https://")) {
             url
         } else {
-            "${RetrofitClient.BASE_URL}$url"
+            "${RetrofitClient.MEDIA_BASE_URL}$url"
         }
     }
 

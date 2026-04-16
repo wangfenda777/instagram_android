@@ -18,14 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.qiwang.ins_android.R
 import com.qiwang.ins_android.data.model.Story
+import com.qiwang.ins_android.ui.components.MediaImage
 import com.qiwang.ins_android.ui.components.PostCard
 import com.qiwang.ins_android.ui.theme.InstagramDivider
 import com.qiwang.ins_android.ui.theme.OutlineGray
 import com.qiwang.ins_android.ui.viewmodel.HomeViewModel
-import com.qiwang.ins_android.util.MediaUtil
 
 /**
  * 首页 Feed 页面。
@@ -181,13 +180,11 @@ private fun StoryItem(story: Story) {
                 )
                 .padding(3.dp)
         ) {
-            AsyncImage(
-                model = MediaUtil.normalizeUrl(story.avatar),
-                contentDescription = null,
+            MediaImage(
+                url = story.avatar,
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
-                    .background(Color.LightGray)
             )
         }
 
